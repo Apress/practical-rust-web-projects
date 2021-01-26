@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{project_name}}</title>
+    <link rel="stylesheet" href="static/css/index.css" type="text/css">
+  </head>
+  <body>
+    <h1>{{project_name}}</h1>
+    <p>
+      <a href="/add">Add a new cat</a>
+    </p>
+
+    <section class="cats">
+      {{#each cats}}
+        <article class="cat">
+          <h3><a href="/cat/{{this.id}}">{{this.name}}</a></h3>
+          <img src="{{this.image_path}}" />
+        </article>
+      {{/each}}
+    </section>
+  </body>
+</html>

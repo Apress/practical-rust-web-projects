@@ -1,0 +1,16 @@
+.cats {
+  display: flex;
+}
+
+.cat {
+  border: 1px solid grey;
+  min-width: 200px;
+  min-height: 350px;
+  margin: 5px;
+  padding: 5px;
+  text-align: center;
+}
+
+.cat > img {
+  width: 190px;
+}

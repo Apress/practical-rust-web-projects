@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Catdex</title>
+    <link rel="stylesheet" href="static/css/index.css" type="text/css">
+  </head>
+  <body>
+    <script>
+      async function submitForm(e) {
+        e.preventDefault()
+
+        const cat_name = document.getElementById('name').value 
+
+        const cat_post_response = await fetch('https://u4rt3rdb1f.execute-api.eu-central-1.amazonaws.com/dev/cat', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name: cat_name })
+        })
+
+        const image_upload_url = (await cat_post_response.json()).upload_url
+
+        const image = document.getElementById("image").files[0]
+
+        console.log(image)
+
+        const image_upload_response = await fetch(image_upload_url, {
+          method: 'PUT',
+          body: image,
+        })
+
+        if (image_upload_response.status === 200) {
+          alert("Success")
+        } else {
+          alert("Failed")
+        }
+        return false
+      }
+    </script>
+    <h1>Add a new cat</h1>
+
+    <form onsubmit="return submitForm(event)">
+      <label for="name">Name:</label>
+      <input type="text" name="name" id="name" value="" />
+      <label for="image">Image:</label>
+      <input type="file" name="image" id="image" value="" />
+      <button type="submit">Submit</button>
+    </form>
+
+  </body>
+</html>

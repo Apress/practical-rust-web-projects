@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cat</title>
+    <link rel="stylesheet" href="/static/css/cat.css" type="text/css">
+  </head>
+  <body>
+    <h1 id="name">Loading...</h1>
+    <img id="image" />
+    <p>
+      <a href="/index.html">Back</a>
+    </p>
+    <script charset="utf-8">
+      const urlParams = new URLSearchParams(window.location.search)
+      const cat_id = urlParams.get("id")
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch(`/api/cat/${cat_id}`)
+          .then((response) => response.json())
+          .then((cat) => {
+            document.getElementById("name").innerText = cat.name
+            document.getElementById("image").src = cat.image_path
+            document.title = cat.name
+          })
+      })
+    </script>
+  </body>
+</html>

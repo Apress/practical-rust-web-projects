@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo "Running pre-commit checks..."
+cargo fmt
+# find . -name main.rs | xargs rustfmt --check

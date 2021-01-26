@@ -1,0 +1,117 @@
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate serde_json;
+
+use actix_files::Files;
+use actix_web::{web, App, HttpResponse, HttpServer};
+use std::env;
+use diesel::prelude::*;
+use diesel::pg::PgConnection;
+use diesel::r2d2::{self, ConnectionManager};
+use serde::{Serialize};
+
+use self::models::*;
+
+use handlebars::Handlebars;
+
+mod models;
+mod schema;
+
+// PgConnection comes from diesel::prelude
+//type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
+
+#[derive(Serialize)]
+struct IndexTemplateData {
+    project_name: String,
+    cats: Vec<self::models::Cat>
+}
+
+struct SharedData {
+    hb: Handlebars<'static>, // ?
+    pool: r2d2::Pool<ConnectionManager<PgConnection>>
+
+}
+
+async fn index(resources: web::Data<SharedData>) -> HttpResponse {
+    use self::schema::cats::dsl::*; // TODO: imports alias
+    let connection = pool.get().expect("Can't get db connection from pool");
+
+
+    let cats_data = web::block(move || cats.limit(3).load::<Cat>(&connection))
+        .await
+        .map_err(|e| {
+            HttpResponse::InternalServerError().finish()
+        });
+
+    /*
+    let database_url = env::var("DATABASE_URL")
+            .expect("DATABASE_URL must be set");
+    let connection = PgConnection::establish(&database_url)
+            .expect(&format!("Error connecting to {}", database_url));
+
+
+
+    let cats_data = cats.limit(3).load::<Cat>(&connection).expect("Error loading Cats");
+    */
+    /*
+    let data = json!({
+        "project_name": "Catdex",
+        "cats": [
+            {
+                "name": "British short hair",
+                "image_path": "/static/image/british-short-hair.jpg"
+            },
+            {
+                "name": "Persian",
+                "image_path": "/static/image/persian.jpg"
+            },
+            {
+                "name": "Ragdoll",
+                "image_path": "/static/image/ragdoll.jpg"
+            }
+        ]
+    });
+    */
+    let data = IndexTemplateData {
+        project_name: "Catdex".to_string(),
+        cats: cats_data,
+    };
+    let body = resources.hb.render("index", &data).unwrap();
+
+    HttpResponse::Ok().body(body)
+}
+
+#[actix_rt::main]
+async fn main() -> std::io::Result<()> {
+    let mut handlebars = Handlebars::new();
+    handlebars
+        .register_templates_directory(".html", "./static/")
+        .unwrap();
+
+    let database_url = env::var("DATABASE_URL")
+            .expect("DATABASE_URL must be set");
+    let manager = ConnectionManager::<PgConnection>::new(&database_url);
+    let pool = r2d2::Pool::builder()
+        .build(manager)
+        .expect("Failed to create DB connection pool.");
+
+    let resources = web::Data::new(SharedData {
+        hb: handlebars,
+        pool: pool.clone(),
+    });
+
+    println!("Listening on port 8080");
+    HttpServer::new(move || {
+        App::new()
+            .app_data(resources.clone())
+            .service(
+                Files::new("/static", "static")
+                    .show_files_listing(),
+            )
+            .route("/", web::get().to(index))
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
+}

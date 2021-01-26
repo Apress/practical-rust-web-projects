@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Catdex</title>
+    <link rel="stylesheet" href="static/css/index.css" type="text/css">
+  </head>
+  <body>
+    <h1>Add a new cat</h1>
+
+    <form action="add_cat_form" method="post" enctype="multipart/form-data">
+      <label for="name">Name:</label>
+      <input type="text" name="name" id="name" value="" />
+      <label for="image">Image:</label>
+      <input type="file" name="image" id="image" value="" />
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>WebSocket Chat</title>
+    <style type="text/css" media="screen">
+    #messages {
+      width: 95vw;
+      height: 80vh;
+    }
+    #message {
+      width: 80vw;
+    }
+    </style>
+  </head>
+  <body>
+    <textarea name="messages" id="messages"></textarea>
+    <span id="name"></span>
+    <input type="text" id="message"></input>
+    <button id="send">Send</button>
+
+    <script charset="utf-8">
+      document.addEventListener("DOMContentLoaded", function(){
+        const name = prompt("What is your name?")
+        document.getElementById("name").innerText = name;
+
+        const socket = new WebSocket("ws://localhost:8080");
+
+        socket.onmessage = function (event) {
+          const messages = document.getElementById("messages");
+          const msg = JSON.parse(event.data);
+          const time = (new Date(Number(msg.received_at))).toLocaleString("en-US")
+          messages.value += `[${time}] ${msg.name}: ${msg.message}\n`;
+        };
+
+        const sendButton= document.getElementById("send");
+        sendButton.addEventListener("click", (event) => {
+            const message = document.getElementById("message");
+            socket.send(JSON.stringify({
+              name: name,
+              message: message.value
+            }))
+            message.value = "";
+        })
+      });
+    </script>
+  </body>
+</html>

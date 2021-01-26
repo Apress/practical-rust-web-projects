@@ -1,0 +1,2 @@
+[workspace]
+members = ["cats", "cat_post"]

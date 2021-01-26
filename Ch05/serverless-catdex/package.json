@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "serverless": "^1.74.1",
+    "serverless-rust": "^0.3.8"
+  },
+  "name": "serverless-catdex",
+  "dependencies": {
+    "serverless-finch": "^2.6.0"
+  }
+}
